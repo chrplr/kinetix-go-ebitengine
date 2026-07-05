@@ -6,6 +6,8 @@ counterpart to [`kinetix-go`](https://github.com/chrplr/kinetix-go), which uses
 [go-sdl3](https://github.com/Zyko0/go-sdl3) + the
 [pgzgo](https://github.com/chrplr/pgzgo) harness.
 
+**▶ Play it in your browser: <https://chrplr.github.io/kinetix-go-ebitengine/>**
+
 ## Why two versions?
 
 Both repositories run the **same game** on two different pure-Go game stacks, so you
@@ -73,6 +75,11 @@ If you upgrade your Go toolchain, refresh the shim so it matches the compiler:
 ```sh
 cp "$(go env GOROOT)/lib/wasm/wasm_exec.js" .
 ```
+
+You don't have to build it to share it, though: every push to `main` compiles the
+wasm and deploys `index.html` + `wasm_exec.js` + `kinetix.wasm` to GitHub Pages via
+[`.github/workflows/pages.yml`](.github/workflows/pages.yml), so the binary never
+needs to live in the repository.
 
 ## Provenance & license
 
