@@ -1,0 +1,4 @@
+/kinetix
+/kinetix-go-ebitengine
+*.wasm
+.DS_Store

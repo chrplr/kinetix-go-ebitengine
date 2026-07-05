@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kinetix - Ebitengine WebAssembly</title>
+    <script src="wasm_exec.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #121212;
+            color: #e0e0e0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        h1 {
+            margin: 0 0 10px 0;
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            color: #ffffff;
+            text-transform: uppercase;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+        #game-container {
+            position: relative;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8);
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: #000000;
+            border: 2px solid #222;
+        }
+        canvas {
+            display: block;
+            image-rendering: pixelated;
+            width: 384px;
+            height: 384px;
+            max-width: 100vw;
+            max-height: 100vh;
+        }
+        #instructions {
+            margin-top: 15px;
+            font-size: 13px;
+            color: #888888;
+            text-align: center;
+            max-width: 500px;
+            line-height: 1.5;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+        }
+        #instructions b {
+            color: #00d2ff;
+        }
+        #loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 18px;
+            color: #00d2ff;
+            letter-spacing: 2px;
+            font-weight: bold;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 0.4; }
+            50% { opacity: 1; }
+            100% { opacity: 0.4; }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Kinetix</h1>
+
+    <div id="game-container">
+        <div id="loading">LOADING GAME...</div>
+    </div>
+
+    <div id="instructions">
+        Use <b>ARROW KEYS</b> or <b>A / D</b> to move the bat.<br>
+        Press <b>SPACE</b> to launch the ball or fire lasers.
+    </div>
+
+    <script>
+        // Polyfill instantiateStreaming for older browsers
+        if (!WebAssembly.instantiateStreaming) {
+            WebAssembly.instantiateStreaming = async (resp, importObject) => {
+                const source = await (await resp).arrayBuffer();
+                return await WebAssembly.instantiate(source, importObject);
+            };
+        }
+
+        const go = new Go();
+        
+        // Ebitengine automatically picks up any canvas element inside the container,
+        // or appends one to the document body if none is specified.
+        WebAssembly.instantiateStreaming(fetch("kinetix.wasm"), go.importObject)
+            .then((result) => {
+                const loadingEl = document.getElementById("loading");
+                if (loadingEl) {
+                    loadingEl.remove();
+                }
+                go.run(result.instance);
+            })
+            .catch((err) => {
+                console.error("Failed to load WebAssembly:", err);
+                const loadingEl = document.getElementById("loading");
+                if (loadingEl) {
+                    loadingEl.innerText = "FAILED TO LOAD GAME";
+                    loadingEl.style.color = "#ff3333";
+                }
+            });
+    </script>
+</body>
+</html>
