@@ -118,7 +118,6 @@ Two things this pair shows beyond the scorecard:
 ## Provenance & license
 
 Ported to Go from the Python original in *Code the Classics Volume 2*. The game
-design and original assets are © their respective authors / Raspberry Pi Press —
-add the appropriate license before redistributing.
+design and original assets are © their respective authors / Raspberry Pi Press.
 
 The Go source code of this port is distributed under the MIT License.
