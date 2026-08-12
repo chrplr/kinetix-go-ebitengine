@@ -1,0 +1,100 @@
+name: Release binaries
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+# The publish step creates a release and uploads assets to this repo.
+permissions:
+  contents: write
+
+jobs:
+  # Unlike the go-sdl3 ports, Ebitengine is not cross-compilable from a single
+  # runner: it needs cgo for the Linux drivers (GLFW/X11 + ALSA) and for the
+  # macOS one (Metal), so each of those targets must be built natively. Windows
+  # is the exception — Ebitengine drives it through purego, so it cross-compiles
+  # from Linux with cgo off.
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-latest
+            goos: linux
+            goarch: amd64
+            cgo: "1"
+          - runner: ubuntu-latest
+            goos: windows
+            goarch: amd64
+            cgo: "0"
+          - runner: macos-latest
+            goos: darwin
+            goarch: arm64
+            cgo: "1"
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      # Ebitengine's Linux build links against the X11, OpenGL and ALSA headers,
+      # which the runner image does not carry by default.
+      - name: Install Linux build dependencies
+        if: matrix.goos == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libgl1-mesa-dev libxcursor-dev libxi-dev libxinerama-dev \
+            libxrandr-dev libxxf86vm-dev libasound2-dev pkg-config
+
+      # Assets are embedded via go:embed, so the archives are self-contained.
+      # Unix targets ship as .tar.gz (preserves the executable bit); Windows
+      # ships as .zip.
+      - name: Build ${{ matrix.goos }}/${{ matrix.goarch }} archive
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: ${{ matrix.cgo }}
+        run: |
+          set -euo pipefail
+          # Named to stay distinguishable from the go-sdl3 port's kinetix-* assets.
+          stem="kinetix-ebitengine-${{ matrix.goos }}-${{ matrix.goarch }}"
+          mkdir -p dist
+
+          if [ "${{ matrix.goos }}" = "windows" ]; then
+            go build -o kinetix.exe .
+            zip -j "dist/${stem}.zip" kinetix.exe README.md LICENSE
+            rm -f kinetix.exe
+          else
+            go build -o kinetix .
+            tar -czf "dist/${stem}.tar.gz" kinetix README.md LICENSE
+            rm -f kinetix
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.goos }}-${{ matrix.goarch }}
+          path: dist/*
+          if-no-files-found: error
+
+  # Only publish for a version tag; a manual run just builds all three targets
+  # as a compile check, without creating a release.
+  publish:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/*.tar.gz
+            dist/*.zip
+          fail_on_unmatched_files: true
