@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Christophe Pallier
+//
+// SPDX-License-Identifier: Apache-2.0
+
 package main
 
 // Barrel is a falling collectable powerup dropped by a destroyed brick.

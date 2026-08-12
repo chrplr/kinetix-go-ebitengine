@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Christophe Pallier
+//
+// SPDX-License-Identifier: Apache-2.0
+
 package main
 
 // Bat is the player's paddle. It animates between five types as powerups change

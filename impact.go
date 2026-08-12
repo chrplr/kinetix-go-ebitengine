@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Christophe Pallier
+//
+// SPDX-License-Identifier: Apache-2.0
+
 package main
 
 // Impact is a short-lived animation played on ball/wall/brick/barrel events.

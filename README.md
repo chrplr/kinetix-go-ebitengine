@@ -120,4 +120,9 @@ Two things this pair shows beyond the scorecard:
 Ported to Go from the Python original in *Code the Classics Volume 2*. The game
 design and original assets are © their respective authors / Raspberry Pi Press.
 
-The Go source code of this port is distributed under the MIT License.
+Copyright (C) 2026 Christophe Pallier.
+
+The Go source code of this port is licensed under the [Apache License, Version 2.0](LICENSE)
+(`SPDX-License-Identifier: Apache-2.0`). That licence covers the Go source only —
+the game design and original assets remain © their respective authors /
+Raspberry Pi Press.
