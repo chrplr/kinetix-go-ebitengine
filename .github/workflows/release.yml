@@ -50,7 +50,10 @@ jobs:
             libgl1-mesa-dev libxcursor-dev libxi-dev libxinerama-dev \
             libxrandr-dev libxxf86vm-dev libasound2-dev pkg-config
 
-      # Assets are embedded via go:embed, so the archives are self-contained.
+      # Assets are embedded via go:embed, so nothing has to be shipped alongside
+      # the binary. Note this is not the same as the go-sdl3 ports' fully static
+      # builds: the cgo targets link the system graphics/audio libraries, so the
+      # Linux binary needs X11, OpenGL and ALSA present at runtime.
       # Unix targets ship as .tar.gz (preserves the executable bit); Windows
       # ships as .zip.
       - name: Build ${{ matrix.goos }}/${{ matrix.goarch }} archive
